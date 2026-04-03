@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Night - Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Casino Night - Mission Control</h1>
+        <div class="status-indicator">🔴 Live Monitoring Active</div>
+    </header>
+
+    <main class="dashboard">
+        {% for slot in [1, 2, 3] %}
+        <div class="slot-card" id="card-{{ slot }}">
+            <h2>Slot Machine {{ slot }}</h2>
+            
+            <div class="status-badge" id="status-{{ slot }}">LOCKED</div>
+
+            <div class="live-stats">
+                <p>Spins Left: <strong id="spins-left-{{ slot }}">0</strong></p>
+                <p>Winnings: <strong id="winnings-{{ slot }}">0</strong> coins</p>
+            </div>
+
+            <div class="controls">
+                <div class="input-group">
+                    <label>Bet (Coins):</label>
+                    <input type="number" id="bet-{{ slot }}" value="1" min="1" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Total Spins:</label>
+                    <input type="number" id="spins-{{ slot }}" value="10" min="1" max="100">
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn-buyin" id="btn-buyin-{{ slot }}" onclick="buyIn({{ slot }})">Buy-In / Unlock</button>
+                <button class="btn-cashout" id="btn-cashout-{{ slot }}" onclick="cashOut({{ slot }})">Cash Out / Lock</button>
+            </div>
+        </div>
+        {% endfor %}
+    </main>
+
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

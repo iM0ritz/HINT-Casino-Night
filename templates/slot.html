@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Machine {{ slot_id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="slot-body">
+
+    <div id="locked-overlay" class="overlay">
+        <h1 id="overlay-text">MACHINE LOCKED</h1>
+        <p>Please see the Admin to Buy-In.</p>
+    </div>
+
+    <div class="slot-container">
+        <header class="slot-header">
+            <h2>Machine #{{ slot_id }}</h2>
+            <div class="stats-bar">
+                <div class="stat-box">Bet: <span id="bet-display">0</span></div>
+                <div class="stat-box">Spins: <span id="spins-display">0</span></div>
+                <div class="stat-box highlight">Winnings: <span id="winnings-display">0</span></div>
+            </div>
+        </header>
+
+        <div class="reels-container">
+            <div class="reel" id="reel-1"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-1"></div>
+            <div class="reel" id="reel-2"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-2"></div>
+            <div class="reel" id="reel-3"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-3"></div>
+        </div>
+
+        <div class="controls-area">
+            <button id="spin-button" class="btn-spin" onclick="spinReels()" disabled>SPIN (Spacebar)</button>
+            <p id="win-message" class="win-message"></p>
+        </div>
+    </div>
+
+    <script>
+        const currentSlotId = {{ slot_id }};
+    </script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Night - Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Specific styles just for centering the login box */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        .login-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 350px;
+            border-top: 5px solid var(--accent-blue);
+        }
+        .login-card input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px 0;
+            box-sizing: border-box;
+            letter-spacing: 5px;
+        }
+        .login-card button {
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 1.2rem;
+            padding: 12px;
+        }
+        .error-message {
+            color: var(--accent-red);
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-card">
+            <h2>Admin Access</h2>
+            <p>Please enter your PIN to continue.</p>
+
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="/login">
+                <input type="password" name="pin" placeholder="••••" required autofocus autocomplete="off">
+                <button type="submit">Unlock Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
