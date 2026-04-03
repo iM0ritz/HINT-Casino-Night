@@ -103,12 +103,17 @@ async function spinReels() {
         }
 
         // 3. Set the base stopping times (staggered left-to-right)
-        let stopTime1 = 800;  // Reel 1 stops after 0.8s
-        let stopTime2 = 1600; // Reel 2 stops after 1.6s
-        let stopTime3 = 2400; // Reel 3 stops after 2.4s
+        let stopTime1 = 1000;  // Reel 1 stops after 1s
+        let stopTime2 = 2000; // Reel 2 stops after 2s
+        let stopTime3 = 3000; // Reel 3 stops after 3s
 
         // 4. If Reel 1 and Reel 2 are both Jackpots ("A")
         if (result.symbols[0] === "A" && result.symbols[1] === "A") {
+            stopTime3 += 1500; // Add 1.5s of intense tension to Reel 3!
+        }
+
+        // If Reel 1 and Reel 2 are both Medium Wins ("B")
+        if (result.symbols[0] === "B" && result.symbols[1] === "B") {
             stopTime3 += 500; // Add 0.5s of intense tension to Reel 3!
         }
 
