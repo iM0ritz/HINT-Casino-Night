@@ -10,29 +10,53 @@
 
     <div id="locked-overlay" class="overlay">
         <h1 id="overlay-text">MACHINE LOCKED</h1>
-        <p>Please see the Admin to Buy-In.</p>
+        <p id="overlay-subtext">Please see the Admin to Buy-In.</p>
     </div>
 
-    <div class="slot-container">
-        <header class="slot-header">
-            <h2>Machine #{{ slot_id }}</h2>
-            <div class="stats-bar">
-                <div class="stat-box">Bet: <span id="bet-display">0</span></div>
-                <div class="stat-box">Spins: <span id="spins-display">0</span></div>
-                <div class="stat-box highlight">Winnings: <span id="winnings-display">0</span></div>
+    <div class="game-layout">
+        
+        <aside class="paytable">
+            <h3>PAYOUTS</h3>
+            <div class="pay-row jackpot-row">
+                <img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" alt="Jackpot">
+                <span id="pay-jackpot">3x = 0 (75x)</span>
             </div>
-        </header>
+            <div class="pay-row">
+                <img src="{{ url_for('static', filename='assets/HiEd_Logo.png') }}" alt="Medium">
+                <span id="pay-medium">3x = 0 (15x)</span>
+            </div>
+            <div class="pay-row">
+                <img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" alt="Frequent">
+                <span id="pay-frequent">3x = 0 (2x)</span>
+            </div>
+        </aside>
 
-        <div class="reels-container">
-            <div class="reel" id="reel-1"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-1"></div>
-            <div class="reel" id="reel-2"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-2"></div>
-            <div class="reel" id="reel-3"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-3"></div>
-        </div>
+        <div class="slot-container">
+            <header class="slot-header">
+                <h2 class="machine-title">Machine #{{ slot_id }}</h2>
+                
+                <p id="win-message" class="win-message">&nbsp;</p>
+            </header>
 
-        <div class="controls-area">
-            <button id="spin-button" class="btn-spin" onclick="spinReels()" disabled>SPIN (Spacebar)</button>
-            <p id="win-message" class="win-message"></p>
+            <div class="reels-bg">
+                <div class="reels-container">
+                    <div class="reel" id="reel-1"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-1"></div>
+                    <div class="reel" id="reel-2"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-2"></div>
+                    <div class="reel" id="reel-3"><img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" id="img-3"></div>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-box">Bet<br><span id="bet-display">0</span></div>
+                <div class="stat-box">Remaining Spins<br><span id="spins-display">0</span></div>
+                <div class="stat-box total-win-box">Total Win<br><span id="winnings-display">0</span></div>
+            </div>
+
+            <div class="controls-area">
+                <button id="spin-button" class="btn-spin" onclick="spinReels()" disabled>SPIN (Spacebar)</button>
+            </div>
         </div>
+        
     </div>
 
     <script>

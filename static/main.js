@@ -34,19 +34,28 @@ function updateUI(state) {
     document.getElementById("spins-display").innerText = state.spins_left;
     document.getElementById("winnings-display").innerText = state.winnings;
 
+    // Use the bet if active, otherwise default to 0 for a locked machine
+    const currentBet = state.bet > 0 ? state.bet : 0; 
+    document.getElementById("pay-jackpot").innerText = `3x = ${currentBet * 75} (75x)`;
+    document.getElementById("pay-medium").innerText = `3x = ${currentBet * 15} (15x)`;
+    document.getElementById("pay-frequent").innerText = `3x = ${currentBet * 2} (2x)`;
+
     const overlay = document.getElementById("locked-overlay");
     const spinBtn = document.getElementById("spin-button");
     const overlayText = document.getElementById("overlay-text");
+    const overlaySubtext = document.getElementById("overlay-subtext");
 
     if (state.status === "locked") {
         overlay.style.display = "flex";
         overlayText.innerText = "MACHINE LOCKED";
         overlayText.style.color = "var(--accent-red)";
+        overlaySubtext.innerText = "Please see the Admin to Buy-In.";
         spinBtn.disabled = true;
     } else if (state.status === "finished") {
         overlay.style.display = "flex";
         overlayText.innerText = "OUT OF SPINS!";
         overlayText.style.color = "var(--accent-orange)";
+        overlaySubtext.innerText = "Please see the Admin to collect your winnings!";
         spinBtn.disabled = true;
     } else {
         // Unlocked state
@@ -65,62 +74,95 @@ document.addEventListener("keydown", function(event) {
     }
 });
 
+// Helper function to pick a random visual symbol while spinning
+function getRandomSymbol() {
+    return ASSETS[ALL_SYMBOLS[Math.floor(Math.random() * 3)]];
+}
+
 async function spinReels() {
     isSpinning = true;
     document.getElementById("spin-button").disabled = true;
-    document.getElementById("win-message").innerText = "";
+    document.getElementById("win-message").innerHTML = "&nbsp;"; // Clear win text
 
-    // 1. Start the visual animation
-    const visualSpin = setInterval(() => {
-        document.getElementById("img-1").src = ASSETS[ALL_SYMBOLS[Math.floor(Math.random() * 3)]];
-        document.getElementById("img-2").src = ASSETS[ALL_SYMBOLS[Math.floor(Math.random() * 3)]];
-        document.getElementById("img-3").src = ASSETS[ALL_SYMBOLS[Math.floor(Math.random() * 3)]];
-    }, 100);
+    // 1. Start spinning all three reels independently
+    const spinSpeed = 80; // ms per image swap
+    let spin1 = setInterval(() => document.getElementById("img-1").src = getRandomSymbol(), spinSpeed);
+    let spin2 = setInterval(() => document.getElementById("img-2").src = getRandomSymbol(), spinSpeed);
+    let spin3 = setInterval(() => document.getElementById("img-3").src = getRandomSymbol(), spinSpeed);
 
-    // 2. Fetch the actual math result from the secure Python server
     try {
+        // 2. Fetch the actual result from the secure Python server
         const response = await fetch(`/api/slot/${currentSlotId}/spin`, { method: 'POST' });
         const result = await response.json();
 
         if (result.error) {
             alert(result.error);
-            clearInterval(visualSpin);
+            clearInterval(spin1); clearInterval(spin2); clearInterval(spin3);
             isSpinning = false;
             return;
         }
 
-        // 3. Stop the animation after 1.5 seconds and show the real result
+        // 3. Set the base stopping times (staggered left-to-right)
+        let stopTime1 = 800;  // Reel 1 stops after 0.8s
+        let stopTime2 = 1600; // Reel 2 stops after 1.6s
+        let stopTime3 = 2400; // Reel 3 stops after 2.4s
+
+        // 4. If Reel 1 and Reel 2 are both Jackpots ("A")
+        if (result.symbols[0] === "A" && result.symbols[1] === "A") {
+            stopTime3 += 500; // Add 0.5s of intense tension to Reel 3!
+        }
+
+        // 5. Execute the stops sequentially
+        // Stop Reel 1
         setTimeout(() => {
-            clearInterval(visualSpin);
-            
-            // Set final images
+            clearInterval(spin1);
             document.getElementById("img-1").src = ASSETS[result.symbols[0]];
+        }, stopTime1);
+
+        // Stop Reel 2
+        setTimeout(() => {
+            clearInterval(spin2);
             document.getElementById("img-2").src = ASSETS[result.symbols[1]];
+        }, stopTime2);
+
+        // Stop Reel 3 and finish game
+        setTimeout(() => {
+            clearInterval(spin3);
             document.getElementById("img-3").src = ASSETS[result.symbols[2]];
 
             // Display win message if applicable
             if (result.win_amount > 0) {
-                document.getElementById("win-message").innerText = `WINNER! +${result.win_amount} COINS`;
+                let winText = "";
+                // Check the first symbol to see which prize they won
+                if (result.symbols[0] === "A") {
+                    winText = `JAAACKPOT!<br>+${result.win_amount} COINS`;
+                } else if (result.symbols[0] === "B") {
+                    winText = `BIG WIN!<br>+${result.win_amount} COINS`;
+                } else {
+                    winText = `WIN!<br>+${result.win_amount} COINS`;
+                }
+                document.getElementById("win-message").innerHTML = winText;
             }
 
-            // Update stats visually right away
+            // Update stats
             document.getElementById("spins-display").innerText = result.spins_left;
             document.getElementById("winnings-display").innerText = result.total_winnings;
 
-            isSpinning = false;
-            
-            // Re-enable button if they still have spins
             if (result.status === "unlocked") {
+                isSpinning = false;
                 document.getElementById("spin-button").disabled = false;
             } else {
-                fetchState(); // Force a state update to show the "Finished" overlay
+                // Out of spins! Wait 3 seconds, then lock it
+                setTimeout(() => {
+                    isSpinning = false; 
+                    fetchState(); 
+                }, 3000);
             }
-            
-        }, 1500); // 1.5 seconds of suspense!
+        }, stopTime3);
 
     } catch (error) {
         console.error("Error during spin:", error);
-        clearInterval(visualSpin);
+        clearInterval(spin1); clearInterval(spin2); clearInterval(spin3);
         isSpinning = false;
     }
 }

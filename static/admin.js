@@ -84,7 +84,7 @@ async function buyIn(slotId) {
 }
 
 async function cashOut(slotId) {
-    if (confirm(`Have you cashed out Slot ${slotId}?`)) {
+    if (confirm(`Did you cash out Slot ${slotId}?`)) {
         try {
             const response = await fetch('/api/admin/cashout', {
                 method: 'POST',
