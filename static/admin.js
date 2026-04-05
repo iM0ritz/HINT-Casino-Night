@@ -57,6 +57,19 @@ function updateUI(data) {
     }
 }
 
+function calculateTotal(slotId) {
+    const betInput = document.getElementById(`bet-${slotId}`);
+    const spinsInput = document.getElementById(`spins-${slotId}`);
+    const totalDisplay = document.getElementById(`total-cost-${slotId}`);
+
+    if (betInput && spinsInput && totalDisplay) {
+        const betValue = parseInt(betInput.value) || 0;
+        const spinsValue = parseInt(spinsInput.value) || 0;
+        const totalToCollect = betValue * spinsValue;
+        totalDisplay.innerText = totalToCollect;
+    }
+}
+
 async function buyIn(slotId) {
     const bet = document.getElementById(`bet-${slotId}`).value;
     const spins = document.getElementById(`spins-${slotId}`).value;

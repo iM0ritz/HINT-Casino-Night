@@ -21,6 +21,7 @@ header {
     margin-bottom: 40px;
 }
 
+/* --- ADMIN DASHBOARD STYLES --- */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -103,8 +104,7 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-buyin { background-color: var(--accent-blue); color: white; }
 .btn-cashout { background-color: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); }
 
-/* --- PREMIUM SLOT MACHINE STYLES --- */
-
+/* --- SLOT MACHINE STYLES --- */
 .slot-body {
     display: flex;
     justify-content: center;

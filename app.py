@@ -3,7 +3,6 @@ import random
 
 app = Flask(__name__)
 
-# TODO: Add calculation for buy in
 # TODO: Add dopamine (e.g. for jackpot add overlay that counts up winnings while flashing lights)
 
 # --- SECURITY SETTINGS ---

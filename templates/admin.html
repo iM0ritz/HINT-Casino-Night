@@ -21,18 +21,22 @@
 
             <div class="live-stats">
                 <p>Spins Left: <strong id="spins-left-{{ slot }}">0</strong></p>
-                <p>Winnings: <strong id="winnings-{{ slot }}">0</strong> coins</p>
+                <p>Winnings: <strong id="winnings-{{ slot }}">0</strong> Coins</p>
             </div>
 
             <div class="controls">
                 <div class="input-group">
                     <label>Bet (Coins):</label>
-                    <input type="number" id="bet-{{ slot }}" value="1" min="1" max="100">
+                    <input type="number" id="bet-{{ slot }}" value="1" min="1" max="100" oninput="calculateTotal({{ slot }})">
                 </div>
                 <div class="input-group">
                     <label>Total Spins:</label>
-                    <input type="number" id="spins-{{ slot }}" value="10" min="1" max="100">
+                    <input type="number" id="spins-{{ slot }}" value="10" min="1" max="100" oninput="calculateTotal({{ slot }})">
                 </div>
+            </div>
+
+            <div class="live-stats">
+                Collect from Player: <strong id="total-cost-{{ slot }}">10</strong> Coins
             </div>
 
             <div class="actions">
