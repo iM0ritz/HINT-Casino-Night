@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slot Machine {{ slot_id }}</title>
+    <title>HINT Slot {{ slot_id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="slot-body">
@@ -30,11 +30,11 @@
                 <img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" alt="Jackpot">
                 <span id="pay-jackpot">3x = 0 (75x)</span>
             </div>
-            <div class="pay-row">
+            <div class="pay-row silver-row">
                 <img src="{{ url_for('static', filename='assets/HiEd_Logo.png') }}" alt="Medium">
                 <span id="pay-medium">3x = 0 (15x)</span>
             </div>
-            <div class="pay-row">
+            <div class="pay-row bronze-row">
                 <img src="{{ url_for('static', filename='assets/HIKE_Logo.png') }}" alt="Frequent">
                 <span id="pay-frequent">3x = 0 (2x)</span>
             </div>
@@ -42,16 +42,22 @@
 
         <div class="slot-container">
             <header class="slot-header">
-                <h2 class="machine-title">Machine #{{ slot_id }}</h2>
+                <h2 class="machine-title">HINT Slot #{{ slot_id }}</h2>
                 
                 <p id="win-message" class="win-message">&nbsp;</p>
             </header>
 
             <div class="reels-bg">
                 <div class="reels-container">
-                    <div class="reel reel-gold" id="reel-1"><img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" id="img-1"></div>
-                    <div class="reel reel-gold" id="reel-2"><img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" id="img-2"></div>
-                    <div class="reel reel-gold" id="reel-3"><img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" id="img-3"></div>
+                    <div class="reel reel-gold" id="reel-1">
+                        <div class="reel-strip" id="strip-1"><img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" class="symbol-img"></div>
+                    </div>
+                    <div class="reel reel-gold" id="reel-2">
+                        <div class="reel-strip" id="strip-2"><img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" class="symbol-img"></div>
+                    </div>
+                    <div class="reel reel-gold" id="reel-3">
+                        <div class="reel-strip" id="strip-3"><img src="{{ url_for('static', filename='assets/HINT_Logo.png') }}" class="symbol-img"></div>
+                    </div>
                 </div>
             </div>
 

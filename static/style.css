@@ -172,7 +172,7 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
 }
 
 .jackpot-row {
-    border-color: #ffd700; /* Gold border */
+    border-color: #ffd700;
     box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
@@ -180,6 +180,28 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     color: #ffd700; 
     /* text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.4); */
 }
+
+.silver-row {
+    border-color: #e3e4e5; 
+    box-shadow: inset 0 0 15px rgba(227, 228, 229, 0.3);
+}
+
+.silver-row span { 
+    color: #e3e4e5; 
+    /* text-shadow: 0 0 8px rgba(227, 228, 229, 0.6); */
+}
+
+.bronze-row {
+    border-color: #cd7f32; 
+    box-shadow: inset 0 0 15px rgba(205, 127, 50, 0.3);
+}
+
+.bronze-row span { 
+    color: #cd7f32; 
+    /* text-shadow: 0 0 8px rgba(205, 127, 50, 0.6); */ 
+}
+
+/* Slot Machine Styling */
 
 .slot-container {
     background: linear-gradient(145deg, #1e1e2f, #151520);
@@ -194,7 +216,7 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     margin: -20px 0 25px 0;
     text-transform: uppercase;
     letter-spacing: 3px;
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     color: #00ffff;
     /* text-shadow: 0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4); */
     text-align: center;
@@ -222,11 +244,26 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     border-radius: 10px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;     
     overflow: hidden;
     border: 4px solid #555; 
     box-shadow: inset 0 15px 15px rgba(0,0,0,0.3), inset 0 -15px 15px rgba(0,0,0,0.3);
     transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.reel-strip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.symbol-img {
+    display: block;
+    width: 180px; 
+    height: 200px;
+    object-fit: contain;
+    flex-shrink: 0; 
 }
 
 .reel img {
@@ -338,6 +375,15 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     letter-spacing: 2px;
     text-align: center;
     line-height: 1.1;
+
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.win-message.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .overlay {

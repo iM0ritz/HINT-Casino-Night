@@ -10,6 +10,7 @@ let isSpinning = false;
 let machineStatus = "locked";
 let isAutoSpinning = false;
 let autoSpinTimeout = null;
+let currentSymbols = ["A", "A", "A"];
 
 // Poll the server every 1 second to check for unlocked/cashout states
 setInterval(fetchState, 1000);
@@ -126,20 +127,54 @@ const BORDER_CLASSES = {
     "C": "reel-bronze"   // Frequent
 };
 
+// Helper function to handle the physical sliding of the reel strip
+function animateStrip(stripId, targetSymbol, duration, extraSpins) {
+    const strip = document.getElementById(stripId);
+    const reelIndex = parseInt(stripId.split('-')[1]) - 1; // Gets 0, 1, or 2
+    const currentSymbolKey = currentSymbols[reelIndex];
+
+    // 1. Build the strip: Start with what is currently on screen to avoid jumping
+    let stripHTML = `<img src="${ASSETS[currentSymbolKey]}" class="symbol-img">`;
+    
+    // 2. Add a bunch of random symbols to create the "blur" effect
+    const numBlurSymbols = 15 + extraSpins; // Reels 2 and 3 get more blur symbols to spin longer
+    for (let i = 0; i < numBlurSymbols; i++) {
+        stripHTML += `<img src="${getRandomSymbol()}" class="symbol-img">`;
+    }
+    
+    // 3. Add the actual target symbol at the very bottom
+    stripHTML += `<img src="${ASSETS[targetSymbol]}" class="symbol-img">`;
+
+    // Reset the strip instantly to the top
+    strip.innerHTML = stripHTML;
+    strip.style.transition = "none";
+    strip.style.transform = "translateY(0)";
+
+    // Force the browser to register the reset before animating
+    void strip.offsetHeight; 
+
+    // Calculate how far down to pull the strip (200px height per symbol)
+    const targetY = -(numBlurSymbols + 1) * 200; 
+
+    // 4. Trigger the physical slide! (The bezier curve adds a slight mechanical bounce at the end)
+    strip.style.transition = `transform ${duration}ms cubic-bezier(0.1, 0.8, 0.2, 1.05)`;
+    strip.style.transform = `translateY(${targetY}px)`;
+}
+
+
 async function spinReels() {
     isSpinning = true;
     document.getElementById("spin-button").disabled = true;
-    document.getElementById("win-message").innerHTML = "&nbsp;"; 
+    
+    const winMsg = document.getElementById("win-message");
+    winMsg.classList.remove("show"); 
+    setTimeout(() => {
+        if (isSpinning) winMsg.innerHTML = "&nbsp;"; 
+    }, 400);
 
-    // Reset all reels to the default grey border while spinning
     document.getElementById("reel-1").className = "reel";
     document.getElementById("reel-2").className = "reel";
     document.getElementById("reel-3").className = "reel";
-
-    const spinSpeed = 75; 
-    let spin1 = setInterval(() => document.getElementById("img-1").src = getRandomSymbol(), spinSpeed);
-    let spin2 = setInterval(() => document.getElementById("img-2").src = getRandomSymbol(), spinSpeed);
-    let spin3 = setInterval(() => document.getElementById("img-3").src = getRandomSymbol(), spinSpeed);
 
     try {
         const response = await fetch(`/api/slot/${currentSlotId}/spin`, { method: 'POST' });
@@ -147,60 +182,56 @@ async function spinReels() {
 
         if (result.error) {
             alert(result.error);
-            clearInterval(spin1); clearInterval(spin2); clearInterval(spin3);
             isSpinning = false;
             return;
         }
 
-        let stopTime1 = 1000;  
-        let stopTime2 = 2000; 
-        let stopTime3 = 3000; 
+        let stopTime1 = 1500;  
+        let stopTime2 = 2500; 
+        let stopTime3 = 3500; 
 
+        // Base amount of extra symbols to create the blur
+        let extraSpins1 = 0;
+        let extraSpins2 = 10;
+        let extraSpins3 = 20;
+
+        // Anticipation Tease Logic: Add both TIME and SYMBOLS to keep speed constant!
         if (result.symbols[0] === "B" && result.symbols[1] === "B") {
-            stopTime3 += 500; 
+            stopTime3 += 1500; // Add 1.5 seconds of suspense
+            extraSpins3 += 25; // Add 25 more symbols so it spins just as fast
         }
-
         if (result.symbols[0] === "A" && result.symbols[1] === "A") {
-            stopTime3 += 1500; 
+            stopTime3 += 3000; // Add 3 full seconds of suspense for a Jackpot tease
+            extraSpins3 += 50; // Add 50 more symbols
         }
 
-        // Stop Reel 1
-        setTimeout(() => {
-            clearInterval(spin1);
-            document.getElementById("img-1").src = ASSETS[result.symbols[0]];
-            // NEW: Add the dynamic border color class
-            document.getElementById("reel-1").classList.add(BORDER_CLASSES[result.symbols[0]]);
-        }, stopTime1);
+        // Start the physical spin animations!
+        animateStrip('strip-1', result.symbols[0], stopTime1, extraSpins1);
+        animateStrip('strip-2', result.symbols[1], stopTime2, extraSpins2);
+        animateStrip('strip-3', result.symbols[2], stopTime3, extraSpins3);
 
-        // Stop Reel 2
-        setTimeout(() => {
-            clearInterval(spin2);
-            document.getElementById("img-2").src = ASSETS[result.symbols[1]];
-            // NEW: Add the dynamic border color class
-            document.getElementById("reel-2").classList.add(BORDER_CLASSES[result.symbols[1]]);
-        }, stopTime2);
+        // Turn on the glowing borders the exact moment each reel lands
+        setTimeout(() => document.getElementById("reel-1").classList.add(BORDER_CLASSES[result.symbols[0]]), stopTime1);
+        setTimeout(() => document.getElementById("reel-2").classList.add(BORDER_CLASSES[result.symbols[1]]), stopTime2);
 
-        // Stop Reel 3 and finish game
+        // Final reel stops
         setTimeout(() => {
-            clearInterval(spin3);
-            document.getElementById("img-3").src = ASSETS[result.symbols[2]];
             document.getElementById("reel-3").classList.add(BORDER_CLASSES[result.symbols[2]]);
+
+            // Save what just landed so the next spin starts correctly
+            currentSymbols = result.symbols;
 
             if (result.win_amount > 0) {
                 let winText = "";
-                if (result.symbols[0] === "A") {
-                    winText = `JAAACKPOT!<br>+${result.win_amount} COINS`;
-                } else if (result.symbols[0] === "B") {
-                    winText = `BIG WIN!<br>+${result.win_amount} COINS`;
-                } else {
-                    winText = `WIN!<br>+${result.win_amount} COINS`;
-                }
+                if (result.symbols[0] === "A") winText = `JAAACKPOT!<br>+${result.win_amount} COINS`;
+                else if (result.symbols[0] === "B") winText = `BIG WIN!<br>+${result.win_amount} COINS`;
+                else winText = `WIN!<br>+${result.win_amount} COINS`;
                 document.getElementById("win-message").innerHTML = winText;
+                void winMsg.offsetWidth; 
+                winMsg.classList.add("show");
             }
 
-            // Define what happens AFTER a spin finishes (or after a jackpot ends)
             const finishSpinRoutine = () => {
-                // Update stats
                 document.getElementById("spins-display").innerText = result.spins_left;
                 document.getElementById("winnings-display").innerText = result.total_winnings;
 
@@ -227,18 +258,16 @@ async function spinReels() {
 
             // INTERCEPT THE JACKPOT
             if (result.win_amount > 0 && result.symbols[0] === "A") {
-                // It's a jackpot! Turn off autospin and trigger the epic animation.
                 if (isAutoSpinning) toggleAutoSpin();
                 playJackpotRollup(result.win_amount, finishSpinRoutine);
             } else {
-                // Normal win or loss, finish immediately
                 finishSpinRoutine();
             }
+
         }, stopTime3);
 
     } catch (error) {
         console.error("Error during spin:", error);
-        clearInterval(spin1); clearInterval(spin2); clearInterval(spin3);
         isSpinning = false;
     }
 }
