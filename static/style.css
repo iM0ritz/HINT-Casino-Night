@@ -114,9 +114,8 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     margin: 0;
     padding: 0;
     background: 
-        /* 1. A dark tint to ensure the neon text stays readable */
-        /* linear-gradient(rgba(10, 10, 20, 0.6), rgba(0, 0, 0, 0.9)), */
-        url('/static/assets/dark-poker-background.jpg') center center no-repeat;
+        linear-gradient(rgba(10, 10, 20, 0.6), rgba(10, 10, 20, 0.6)),
+        url('/static/assets/background-5.jpg') center center no-repeat;
     background-size: cover; 
 }
 
