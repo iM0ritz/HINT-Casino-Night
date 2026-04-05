@@ -184,7 +184,6 @@ async function spinReels() {
         setTimeout(() => {
             clearInterval(spin3);
             document.getElementById("img-3").src = ASSETS[result.symbols[2]];
-            // NEW: Add the dynamic border color class
             document.getElementById("reel-3").classList.add(BORDER_CLASSES[result.symbols[2]]);
 
             if (result.win_amount > 0) {
@@ -199,41 +198,41 @@ async function spinReels() {
                 document.getElementById("win-message").innerHTML = winText;
             }
 
-            document.getElementById("spins-display").innerText = result.spins_left;
-            document.getElementById("winnings-display").innerText = result.total_winnings;
+            // Define what happens AFTER a spin finishes (or after a jackpot ends)
+            const finishSpinRoutine = () => {
+                // Update stats
+                document.getElementById("spins-display").innerText = result.spins_left;
+                document.getElementById("winnings-display").innerText = result.total_winnings;
 
-            if (result.status === "unlocked") {
-                isSpinning = false;
-                if (isAutoSpinning) {
-                    let delay = 500; // Default delay for no win
-
-                    // Check for wins to apply custom delays
-                    if (result.win_amount > 0) {
-                        if (result.symbols[0] === "C") {
-                            delay = 1500; // Small win
-                        } else if (result.symbols[0] === "B") {
-                            delay = 2500; // Medium win
-                        } else if (result.symbols[0] === "A") {
-                            // JACKPOT! Turn off auto-spin
-                            toggleAutoSpin();
-                            return; // Stop the auto-spin loop right here
-                        }
-                    }
+                if (result.status === "unlocked") {
+                    isSpinning = false;
                     
-                    // Queue up the next spin
-                    autoSpinTimeout = setTimeout(() => {
-                        if (isAutoSpinning && machineStatus === "unlocked") {
-                            spinReels();
+                    if (isAutoSpinning) {
+                        let delay = 500; 
+                        if (result.win_amount > 0) {
+                            if (result.symbols[0] === "C") delay = 1500;
+                            else if (result.symbols[0] === "B") delay = 2500;
                         }
-                    }, delay);
+                        
+                        autoSpinTimeout = setTimeout(() => {
+                            if (isAutoSpinning && machineStatus === "unlocked") spinReels();
+                        }, delay);
+                    } else {
+                        document.getElementById("spin-button").disabled = false;
+                    }
                 } else {
-                    document.getElementById("spin-button").disabled = false;
+                    setTimeout(() => { isSpinning = false; fetchState(); }, 3000);
                 }
+            };
+
+            // INTERCEPT THE JACKPOT
+            if (result.win_amount > 0 && result.symbols[0] === "A") {
+                // It's a jackpot! Turn off autospin and trigger the epic animation.
+                if (isAutoSpinning) toggleAutoSpin();
+                playJackpotRollup(result.win_amount, finishSpinRoutine);
             } else {
-                setTimeout(() => {
-                    isSpinning = false; 
-                    fetchState(); 
-                }, 3000);
+                // Normal win or loss, finish immediately
+                finishSpinRoutine();
             }
         }, stopTime3);
 
@@ -242,4 +241,86 @@ async function spinReels() {
         clearInterval(spin1); clearInterval(spin2); clearInterval(spin3);
         isSpinning = false;
     }
+}
+
+// --- JACKPOT ANIMATION LOGIC ---
+function playJackpotRollup(winAmount, onCompleteCallback) {
+    const overlay = document.getElementById("jackpot-overlay");
+    const counter = document.getElementById("jackpot-counter");
+    const coinContainer = document.getElementById("coin-container");
+    const layout = document.querySelector(".game-layout"); 
+    const continueText = document.getElementById("jackpot-continue"); // NEW
+    
+    if (!overlay || !counter || !coinContainer) {
+        console.error("JACKPOT ERROR: Missing HTML elements!");
+        onCompleteCallback(); 
+        return; 
+    }
+
+    // Setup & Show Overlay
+    overlay.classList.remove("hidden");
+    counter.classList.remove("jackpot-pop");
+    if (continueText) continueText.classList.add("hidden"); // Ensure it's hidden at start
+    if (layout) layout.classList.add("rumble"); 
+    
+    let startTime = null;
+    const duration = 5000;
+    
+    // Start Coin Fountain
+    let coinInterval = setInterval(() => {
+        const coin = document.createElement("div");
+        coin.classList.add("falling-coin");
+        coin.style.left = Math.random() * 100 + "vw"; 
+        coin.style.animationDuration = (Math.random() * 1 + 1.5) + "s";
+        coinContainer.appendChild(coin);
+        setTimeout(() => coin.remove(), 2500); 
+    }, 50); 
+
+    // The Number Roll-Up Animation
+    function updateCounter(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        
+        counter.innerText = Math.floor(progress * winAmount);
+        
+        // Scale up to 3.5x size
+        counter.style.transform = `scale(${1 + (progress * 2.5)})`;
+
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter); 
+        } else {
+            // THE CLIMAX
+            clearInterval(coinInterval); 
+            if (layout) layout.classList.remove("rumble"); 
+            counter.innerText = winAmount; 
+            counter.classList.add("jackpot-pop"); 
+            
+            // Show the "Press Space" text
+            if (continueText) continueText.classList.remove("hidden");
+
+            // Create a specific listener just to close the overlay
+            const spaceToCloseListener = function(event) {
+                if (event.code === "Space") {
+                    event.preventDefault(); // Stop page scrolling
+                    
+                    // Remove this listener so it doesn't fire again
+                    document.removeEventListener("keydown", spaceToCloseListener);
+                    
+                    // Hide the overlay and clean up
+                    overlay.classList.add("hidden");
+                    counter.style.transform = "scale(1)"; 
+                    counter.classList.remove("jackpot-pop");
+                    coinContainer.innerHTML = ""; 
+                    
+                    // Tell the game to finish the spin and unlock the buttons!
+                    onCompleteCallback(); 
+                }
+            };
+            
+            // Attach the listener
+            document.addEventListener("keydown", spaceToCloseListener);
+        }
+    }
+    
+    requestAnimationFrame(updateCounter);
 }

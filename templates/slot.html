@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="slot-body">
+    <div id="jackpot-overlay" class="hidden">
+        <div class="sunburst"></div>
+        <div id="coin-container"></div>
+        <div class="jackpot-content">
+            <h1 class="jackpot-title">JACKPOT!</h1>
+            <div id="jackpot-counter">0</div>
+            <p id="jackpot-continue" class="hidden">PRESS SPACE TO CONTINUE</p>
+        </div>
+    </div>
 
     <div id="locked-overlay" class="overlay">
         <h1 id="overlay-text">MACHINE LOCKED</h1>

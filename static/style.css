@@ -418,3 +418,144 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     margin-top: 45px;
     margin-bottom: 10px;
 }
+
+/* --- THE JACKPOT ROLL-UP --- */
+
+#jackpot-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 10000; /* Above everything */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.6); /* Darkens the background slightly, but doesn't hide it */
+    overflow: hidden;
+}
+
+#jackpot-overlay.hidden {
+    display: none !important;
+}
+
+/* 1. The Sunburst */
+.sunburst {
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    width: 200vw; 
+    height: 200vw; 
+    background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 215, 0, 0.2) 0deg 15deg,
+        transparent 15deg 30deg
+    );
+    z-index: 1;
+    animation: spin-sunburst 20s linear infinite;
+}
+
+@keyframes spin-sunburst {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 2. The Content */
+.jackpot-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.jackpot-title {
+    position: absolute;
+    bottom: 100%;
+    margin-bottom: 40px;
+    font-size: 8rem;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.8);
+    letter-spacing: 5px;
+    white-space: nowrap;
+}
+
+#jackpot-counter {
+    font-size: 3rem; /* Starts small, JS will scale it up */
+    color: #ffd700;
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+    margin-top: 30px;
+    margin-bottom: 30px;
+    transition: transform 0.1s; /* Smooth scaling */
+}
+
+/* 3. The Final Pop! */
+.jackpot-pop {
+    animation: pop-animation 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes pop-animation {
+    0% { transform: scale(3.5); filter: brightness(1); }
+    50% { transform: scale(4.0); filter: brightness(2) drop-shadow(0 0 50px white); color: white; }
+    100% { transform: scale(3.5); filter: brightness(1.2); color: #ffd700; }
+}
+
+/* 4. Screen Rumble (Applied to the whole app via JS) */
+.rumble {
+    animation: screen-shake 0.1s linear infinite;
+}
+
+@keyframes screen-shake {
+    0% { transform: translate(2px, 2px) rotate(0deg); }
+    25% { transform: translate(-2px, -2px) rotate(-1deg); }
+    50% { transform: translate(-2px, 2px) rotate(1deg); }
+    75% { transform: translate(2px, -2px) rotate(0deg); }
+    100% { transform: translate(2px, 2px) rotate(0deg); }
+}
+
+/* 5. The Coins */
+#coin-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 5;
+    pointer-events: none; /* Let clicks pass through */
+}
+
+.falling-coin {
+    position: absolute;
+    width: 40px; height: 40px;
+    background: radial-gradient(circle, #ffd700 40%, #b8860b 100%);
+    border: 3px solid #ffae42;
+    border-radius: 50%;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.5), 0 5px 10px rgba(0,0,0,0.5);
+    animation: fall-and-spin linear forwards;
+}
+
+@keyframes fall-and-spin {
+    0% { transform: translateY(-50px) rotateY(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotateY(720deg); opacity: 0; }
+}
+
+#jackpot-continue {
+    position: absolute; 
+    top: 100%; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    white-space: nowrap; 
+    color: #fff;
+    margin-top: 200px;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    animation: pulse-text 1.5s infinite;
+}
+
+#jackpot-continue.hidden {
+    display: none;
+}
+
+@keyframes pulse-text {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; text-shadow: 0 0 10px #fff; }
+    100% { opacity: 0.3; }
+}
