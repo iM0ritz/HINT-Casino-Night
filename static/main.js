@@ -130,37 +130,40 @@ const BORDER_CLASSES = {
 // Helper function to handle the physical sliding of the reel strip
 function animateStrip(stripId, targetSymbol, duration, extraSpins) {
     const strip = document.getElementById(stripId);
-    const reelIndex = parseInt(stripId.split('-')[1]) - 1; // Gets 0, 1, or 2
+    const reelIndex = parseInt(stripId.split('-')[1]) - 1; 
     const currentSymbolKey = currentSymbols[reelIndex];
 
-    // 1. Build the strip: Start with what is currently on screen to avoid jumping
+    // 1. Start with the current symbol
     let stripHTML = `<img src="${ASSETS[currentSymbolKey]}" class="symbol-img">`;
     
-    // 2. Add a bunch of random symbols to create the "blur" effect
-    const numBlurSymbols = 15 + extraSpins; // Reels 2 and 3 get more blur symbols to spin longer
+    // 2. Add the blur symbols
+    const numBlurSymbols = 15 + extraSpins; 
     for (let i = 0; i < numBlurSymbols; i++) {
         stripHTML += `<img src="${getRandomSymbol()}" class="symbol-img">`;
     }
     
-    // 3. Add the actual target symbol at the very bottom
+    // 3. Add the actual TARGET symbol
     stripHTML += `<img src="${ASSETS[targetSymbol]}" class="symbol-img">`;
+    
+    // 4. Add one extra "padding" symbol at the very bottom.
+    stripHTML += `<img src="${getRandomSymbol()}" class="symbol-img">`;
 
     // Reset the strip instantly to the top
     strip.innerHTML = stripHTML;
     strip.style.transition = "none";
     strip.style.transform = "translateY(0)";
 
-    // Force the browser to register the reset before animating
+    // Force the browser to register the reset
     void strip.offsetHeight; 
 
-    // Calculate how far down to pull the strip (200px height per symbol)
+    // Calculate how far down to pull the strip to land perfectly on the TARGET symbol.
+    // We ignore that extra padding symbol in the math!
     const targetY = -(numBlurSymbols + 1) * 200; 
 
-    // 4. Trigger the physical slide! (The bezier curve adds a slight mechanical bounce at the end)
+    // Trigger the physical slide using the bezier curve
     strip.style.transition = `transform ${duration}ms cubic-bezier(0.1, 0.8, 0.2, 1.05)`;
     strip.style.transform = `translateY(${targetY}px)`;
 }
-
 
 async function spinReels() {
     isSpinning = true;
