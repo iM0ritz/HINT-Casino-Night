@@ -277,6 +277,51 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
     color: #888;
 }
 
+.buttons-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn-autospin {
+    background: linear-gradient(180deg, #444 0%, #222 100%);
+    color: white;
+    font-size: 1.5rem; /* Slightly smaller than the main spin button */
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    font-weight: 900;
+    border: 3px solid #555;
+    box-shadow: 0 8px 0 #111, 0 15px 20px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-autospin:active {
+    transform: translateY(8px);
+    box-shadow: 0 0 0 #111, 0 5px 10px rgba(0,0,0,0.5);
+}
+
+.btn-autospin:disabled {
+    background: #333;
+    border-color: #222;
+    box-shadow: 0 8px 0 #111;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.btn-autospin.active {
+    background: linear-gradient(180deg, #b829ff 0%, #7000b3 100%); /* Neon Purple */
+    border-color: #d875ff;
+    color: #fff;
+    box-shadow: 0 8px 0 #4a007a, 0 0 25px rgba(184, 41, 255, 0.6);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.btn-autospin.active:active {
+    box-shadow: 0 0 0 #4a007a, 0 0 15px rgba(184, 41, 255, 0.6);
+}
+
 .win-message {
     font-size: 2.5rem;
     color: #ffd700;

@@ -8,6 +8,8 @@ const ALL_SYMBOLS = ["A", "B", "C"];
 
 let isSpinning = false;
 let machineStatus = "locked";
+let isAutoSpinning = false;
+let autoSpinTimeout = null;
 
 // Poll the server every 1 second to check for unlocked/cashout states
 setInterval(fetchState, 1000);
@@ -42,6 +44,7 @@ function updateUI(state) {
 
     const overlay = document.getElementById("locked-overlay");
     const spinBtn = document.getElementById("spin-button");
+    const autoBtn = document.getElementById("autospin-button");
     const overlayText = document.getElementById("overlay-text");
     const overlaySubtext = document.getElementById("overlay-subtext");
 
@@ -51,16 +54,26 @@ function updateUI(state) {
         overlayText.style.color = "var(--accent-red)";
         overlaySubtext.innerText = "Please see the Admin to Buy-In.";
         spinBtn.disabled = true;
+        autoBtn.disabled = true;
+        if (isAutoSpinning) toggleAutoSpin();
     } else if (state.status === "finished") {
         overlay.style.display = "flex";
         overlayText.innerText = "OUT OF SPINS!";
         overlayText.style.color = "var(--accent-orange)";
         overlaySubtext.innerText = "Please see the Admin to collect your winnings!";
         spinBtn.disabled = true;
+        autoBtn.disabled = true;
+        if (isAutoSpinning) toggleAutoSpin();
     } else {
         // Unlocked state
         overlay.style.display = "none";
         spinBtn.disabled = false;
+        autoBtn.disabled = false;
+        if (isAutoSpinning) {
+            spinBtn.disabled = true;
+        } else {
+            spinBtn.disabled = false;
+        }
     }
 }
 
@@ -75,8 +88,36 @@ document.addEventListener("keydown", function(event) {
 });
 
 // Helper function to pick a random visual symbol while spinning
+let lastSymbolKey = "";
 function getRandomSymbol() {
-    return ASSETS[ALL_SYMBOLS[Math.floor(Math.random() * 3)]];
+    const availableSymbols = ALL_SYMBOLS.filter(sym => sym !== lastSymbolKey);
+    const randomPick = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+    lastSymbolKey = randomPick;
+    return ASSETS[randomPick];
+}
+
+function toggleAutoSpin() {
+    isAutoSpinning = !isAutoSpinning;
+    const autoBtn = document.getElementById("autospin-button");
+    const spinBtn = document.getElementById("spin-button");
+    
+    if (isAutoSpinning) {
+        autoBtn.classList.add("active");
+        autoBtn.innerText = "AUTO ON";
+        spinBtn.disabled = true; // Disable manual spin while auto is running
+        
+        // If not currently spinning, start the loop immediately
+        if (!isSpinning && machineStatus === "unlocked") {
+            spinReels();
+        }
+    } else {
+        autoBtn.classList.remove("active");
+        autoBtn.innerText = "AUTO OFF";
+        if (!isSpinning && machineStatus === "unlocked") {
+            spinBtn.disabled = false; // Re-enable manual spin
+        }
+        if (autoSpinTimeout) clearTimeout(autoSpinTimeout);
+    }
 }
 
 const BORDER_CLASSES = {
@@ -95,7 +136,7 @@ async function spinReels() {
     document.getElementById("reel-2").className = "reel";
     document.getElementById("reel-3").className = "reel";
 
-    const spinSpeed = 80; 
+    const spinSpeed = 75; 
     let spin1 = setInterval(() => document.getElementById("img-1").src = getRandomSymbol(), spinSpeed);
     let spin2 = setInterval(() => document.getElementById("img-2").src = getRandomSymbol(), spinSpeed);
     let spin3 = setInterval(() => document.getElementById("img-3").src = getRandomSymbol(), spinSpeed);
@@ -163,7 +204,31 @@ async function spinReels() {
 
             if (result.status === "unlocked") {
                 isSpinning = false;
-                document.getElementById("spin-button").disabled = false;
+                if (isAutoSpinning) {
+                    let delay = 500; // Default delay for no win
+
+                    // Check for wins to apply custom delays
+                    if (result.win_amount > 0) {
+                        if (result.symbols[0] === "C") {
+                            delay = 1500; // Small win
+                        } else if (result.symbols[0] === "B") {
+                            delay = 2500; // Medium win
+                        } else if (result.symbols[0] === "A") {
+                            // JACKPOT! Turn off auto-spin
+                            toggleAutoSpin();
+                            return; // Stop the auto-spin loop right here
+                        }
+                    }
+                    
+                    // Queue up the next spin
+                    autoSpinTimeout = setTimeout(() => {
+                        if (isAutoSpinning && machineStatus === "unlocked") {
+                            spinReels();
+                        }
+                    }, delay);
+                } else {
+                    document.getElementById("spin-button").disabled = false;
+                }
             } else {
                 setTimeout(() => {
                     isSpinning = false; 

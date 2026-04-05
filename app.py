@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 # TODO: Add calculation for buy in
 # TODO: Add dopamine (e.g. for jackpot add overlay that counts up winnings while flashing lights)
-# TODO: Add autospin (button they can toggle, spins 0.5s after spin if no win, 1.5s after spin if win)
 
 # --- SECURITY SETTINGS ---
 # A secret key is required by Flask to encrypt the session cookies. 
