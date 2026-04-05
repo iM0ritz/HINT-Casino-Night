@@ -1,7 +1,16 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import random
+import socket
+import os
+import sys
+import logging
+from flask import Flask, render_template, jsonify, request
 
-app = Flask(__name__)
+# Tell Flask where to find the static/template folders when running as an .exe
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    static_folder = os.path.join(sys._MEIPASS, 'static')
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Flask(__name__)
 
 # --- SECURITY SETTINGS ---
 # A secret key is required by Flask to encrypt the session cookies. 
@@ -144,6 +153,37 @@ def spin_slot(slot_id):
         "status": slot["status"]
     })
 
+# --- HELPER FUNCTION: Get Local IP ---
+def get_local_ip():
+    try:
+        # Connects a dummy socket to find the correct local routing IP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
 if __name__ == '__main__':
-    # host='0.0.0.0' is crucial! It allows the 3 laptops to connect to the Admin computer over Wi-Fi
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+    
+    local_ip = get_local_ip()
+    
+    # User-Friendly Console Output
+    print("\n" + "="*60)
+    print(" 🎰 CASINO NIGHT SLOTS SERVER IS RUNNING! 🎰")
+    print("="*60)
+    print("\n👑 FOR THE ADMIN (YOU):")
+    print(f"   Open your browser and go to: http://127.0.0.1:5000/admin")
+    print("\n💻 FOR THE PLAYER LAPTOPS:")
+    print(f"   Open their browser and go to: http://{local_ip}:5000/slot/1, http://{local_ip}:5000/slot/2, or http://{local_ip}:5000/slot/3")
+    print("\n⚠️  IMPORTANT REMINDERS:")
+    print("   1. All laptops must be connected to the SAME Wi-Fi network!")
+    print("   2. Keep this black window open while people are playing.")
+    print("\n(To stop the server, safely close this window or press CTRL+C)")
+    print("="*60 + "\n")
+
+    # MUST be host='0.0.0.0' to allow other laptops to connect!
+    app.run(host='0.0.0.0', port=5000, debug=False)
