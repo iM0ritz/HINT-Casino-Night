@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+import random
 
 # Tell Flask where to find the static/template folders when running as an .exe
 if getattr(sys, 'frozen', False):
