@@ -205,6 +205,10 @@ async function spinReels() {
             extraSpins3 += 50; // Add 50 more symbols
         }
 
+        if (result.symbols[0] !== result.symbols[1]) {
+            stopTime3 -= 500;
+        }
+
         // Start the physical spin animations!
         animateStrip('strip-1', result.symbols[0], stopTime1, extraSpins1);
         animateStrip('strip-2', result.symbols[1], stopTime2, extraSpins2);
