@@ -79,19 +79,28 @@ function getRandomSymbol() {
     return ASSETS[ALL_SYMBOLS[Math.floor(Math.random() * 3)]];
 }
 
+const BORDER_CLASSES = {
+    "A": "reel-gold",    // Jackpot
+    "B": "reel-silver",  // Medium
+    "C": "reel-bronze"   // Frequent
+};
+
 async function spinReels() {
     isSpinning = true;
     document.getElementById("spin-button").disabled = true;
-    document.getElementById("win-message").innerHTML = "&nbsp;"; // Clear win text
+    document.getElementById("win-message").innerHTML = "&nbsp;"; 
 
-    // 1. Start spinning all three reels independently
-    const spinSpeed = 80; // ms per image swap
+    // Reset all reels to the default grey border while spinning
+    document.getElementById("reel-1").className = "reel";
+    document.getElementById("reel-2").className = "reel";
+    document.getElementById("reel-3").className = "reel";
+
+    const spinSpeed = 80; 
     let spin1 = setInterval(() => document.getElementById("img-1").src = getRandomSymbol(), spinSpeed);
     let spin2 = setInterval(() => document.getElementById("img-2").src = getRandomSymbol(), spinSpeed);
     let spin3 = setInterval(() => document.getElementById("img-3").src = getRandomSymbol(), spinSpeed);
 
     try {
-        // 2. Fetch the actual result from the secure Python server
         const response = await fetch(`/api/slot/${currentSlotId}/spin`, { method: 'POST' });
         const result = await response.json();
 
@@ -102,43 +111,43 @@ async function spinReels() {
             return;
         }
 
-        // 3. Set the base stopping times (staggered left-to-right)
-        let stopTime1 = 1000;  // Reel 1 stops after 1s
-        let stopTime2 = 2000; // Reel 2 stops after 2s
-        let stopTime3 = 3000; // Reel 3 stops after 3s
+        let stopTime1 = 1000;  
+        let stopTime2 = 2000; 
+        let stopTime3 = 3000; 
 
-        // 4. If Reel 1 and Reel 2 are both Jackpots ("A")
-        if (result.symbols[0] === "A" && result.symbols[1] === "A") {
-            stopTime3 += 1500; // Add 1.5s of intense tension to Reel 3!
-        }
-
-        // If Reel 1 and Reel 2 are both Medium Wins ("B")
         if (result.symbols[0] === "B" && result.symbols[1] === "B") {
-            stopTime3 += 500; // Add 0.5s of intense tension to Reel 3!
+            stopTime3 += 500; 
         }
 
-        // 5. Execute the stops sequentially
+        if (result.symbols[0] === "A" && result.symbols[1] === "A") {
+            stopTime3 += 1500; 
+        }
+
         // Stop Reel 1
         setTimeout(() => {
             clearInterval(spin1);
             document.getElementById("img-1").src = ASSETS[result.symbols[0]];
+            // NEW: Add the dynamic border color class
+            document.getElementById("reel-1").classList.add(BORDER_CLASSES[result.symbols[0]]);
         }, stopTime1);
 
         // Stop Reel 2
         setTimeout(() => {
             clearInterval(spin2);
             document.getElementById("img-2").src = ASSETS[result.symbols[1]];
+            // NEW: Add the dynamic border color class
+            document.getElementById("reel-2").classList.add(BORDER_CLASSES[result.symbols[1]]);
         }, stopTime2);
 
         // Stop Reel 3 and finish game
         setTimeout(() => {
             clearInterval(spin3);
             document.getElementById("img-3").src = ASSETS[result.symbols[2]];
+            // NEW: Add the dynamic border color class
+            document.getElementById("reel-3").classList.add(BORDER_CLASSES[result.symbols[2]]);
 
-            // Display win message if applicable
             if (result.win_amount > 0) {
                 let winText = "";
-                // Check the first symbol to see which prize they won
                 if (result.symbols[0] === "A") {
                     winText = `JAAACKPOT!<br>+${result.win_amount} COINS`;
                 } else if (result.symbols[0] === "B") {
@@ -149,7 +158,6 @@ async function spinReels() {
                 document.getElementById("win-message").innerHTML = winText;
             }
 
-            // Update stats
             document.getElementById("spins-display").innerText = result.spins_left;
             document.getElementById("winnings-display").innerText = result.total_winnings;
 
@@ -157,7 +165,6 @@ async function spinReels() {
                 isSpinning = false;
                 document.getElementById("spin-button").disabled = false;
             } else {
-                // Out of spins! Wait 3 seconds, then lock it
                 setTimeout(() => {
                     isSpinning = false; 
                     fetchState(); 
