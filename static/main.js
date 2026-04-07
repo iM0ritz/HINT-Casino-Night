@@ -138,15 +138,39 @@ function animateStrip(stripId, targetSymbol, duration, extraSpins) {
     
     // 2. Add the blur symbols
     const numBlurSymbols = 15 + extraSpins; 
-    for (let i = 0; i < numBlurSymbols; i++) {
+    for (let i = 0; i < numBlurSymbols - 1; i++) {
         stripHTML += `<img src="${getRandomSymbol()}" class="symbol-img">`;
     }
+    
+    // Weighted Padding Symbols (20% Jackpot Tease)
+    function getPaddingSymbol() {
+        if (targetSymbol === "A") {
+            // If the target IS the jackpot, safely pad with anything else
+            const others = ALL_SYMBOLS.filter(sym => sym !== "A");
+            return others[Math.floor(Math.random() * others.length)];
+        } else {
+            // If target is normal, allow a 25% chance for a Jackpot tease
+            if (Math.random() < 0.25) {
+                return "A";
+            } else {
+                // 75% of the time, show the other normal symbol
+                const others = ALL_SYMBOLS.filter(sym => sym !== "A" && sym !== targetSymbol);
+                return others[Math.floor(Math.random() * others.length)];
+            }
+        }
+    }
+
+    const preSymbolKey = getPaddingSymbol();
+    const postSymbolKey = getPaddingSymbol();
+
+    // Add the symbol immediately BEFORE the target
+    stripHTML += `<img src="${ASSETS[preSymbolKey]}" class="symbol-img">`;
     
     // 3. Add the actual TARGET symbol
     stripHTML += `<img src="${ASSETS[targetSymbol]}" class="symbol-img">`;
     
-    // 4. Add one extra "padding" symbol at the very bottom.
-    stripHTML += `<img src="${getRandomSymbol()}" class="symbol-img">`;
+    // 4. Add the padding symbol immediately AFTER the target
+    stripHTML += `<img src="${ASSETS[postSymbolKey]}" class="symbol-img">`;
 
     // Reset the strip instantly to the top
     strip.innerHTML = stripHTML;
@@ -156,8 +180,7 @@ function animateStrip(stripId, targetSymbol, duration, extraSpins) {
     // Force the browser to register the reset
     void strip.offsetHeight; 
 
-    // Calculate how far down to pull the strip to land perfectly on the TARGET symbol.
-    // We ignore that extra padding symbol in the math!
+    // Calculate how far down to pull the strip
     const targetY = -(numBlurSymbols + 1) * 200; 
 
     // Trigger the physical slide using the bezier curve
