@@ -104,6 +104,28 @@ button:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-buyin { background-color: var(--accent-blue); color: white; }
 .btn-cashout { background-color: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); }
 
+input:disabled {
+    background-color: transparent !important;
+    color: #777; 
+    border: 1px dashed #444; 
+    cursor: not-allowed; 
+    opacity: 0.8;
+    box-shadow: none !important;
+}
+
+/* Firefox to hide the disabled arrows */
+input:disabled[type="number"] {
+    -moz-appearance: textfield !important; 
+    appearance: textfield !important; 
+}
+
+/* Chrome, Safari, Edge to hide the disabled arrows */
+input:disabled[type="number"]::-webkit-inner-spin-button, 
+input:disabled[type="number"]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
 /* --- SLOT MACHINE STYLES --- */
 .slot-body {
     display: flex;

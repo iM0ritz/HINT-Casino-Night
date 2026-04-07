@@ -5,6 +5,8 @@ import logging
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 import random
 
+# TODO: If 3rd wheel symbol is Jackpot, the filler symbol after cannot be Jackpot
+
 # Tell Flask where to find the static/template folders when running as an .exe
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')

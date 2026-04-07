@@ -36,37 +36,54 @@ function updateUI(data) {
         // Remove old status classes and add the current one
         badge.className = `status-badge status-${state.status}`;
 
-        // Change card border color to match status for quick visual reading
+        // Get all the elements for this specific slot
         const card = document.getElementById(`card-${slot}`);
         const buyinBtn = document.getElementById(`btn-buyin-${slot}`);
         const cashoutBtn = document.getElementById(`btn-cashout-${slot}`);
+        const betInput = document.getElementById(`bet-${slot}`);
+        const spinsInput = document.getElementById(`spins-${slot}`);
 
         if (state.status === 'locked') {
             card.style.borderColor = "var(--accent-red)";
             buyinBtn.disabled = false;
             cashoutBtn.disabled = true;
+            betInput.disabled = false;
+            spinsInput.disabled = false;
         } else if (state.status === 'unlocked') {
             card.style.borderColor = "var(--accent-green)";
             buyinBtn.disabled = true;
-            cashoutBtn.disabled = false; // Allow early cashout if needed
+            cashoutBtn.disabled = false;
+            betInput.disabled = true;
+            spinsInput.disabled = true;
         } else if (state.status === 'finished') {
             card.style.borderColor = "var(--accent-orange)";
             buyinBtn.disabled = true;
-            cashoutBtn.disabled = false; // They must cash out before playing again
+            cashoutBtn.disabled = false; 
+            betInput.disabled = true;
+            spinsInput.disabled = true;
         }
     }
 }
 
+// Dynamically calculate the cost of a buy-in and enforce maximum limits
 function calculateTotal(slotId) {
     const betInput = document.getElementById(`bet-${slotId}`);
     const spinsInput = document.getElementById(`spins-${slotId}`);
     const totalDisplay = document.getElementById(`total-cost-${slotId}`);
 
     if (betInput && spinsInput && totalDisplay) {
+        if (parseInt(betInput.value) > 100000) {
+            betInput.value = 100000;
+        }
+        if (parseInt(spinsInput.value) > 100) {
+            spinsInput.value = 100;
+        }
+
+        // Parse the inputs for the math (default to 0 if empty)
         const betValue = parseInt(betInput.value) || 0;
         const spinsValue = parseInt(spinsInput.value) || 0;
-        const totalToCollect = betValue * spinsValue;
-        totalDisplay.innerText = totalToCollect;
+        
+        totalDisplay.innerText = betValue * spinsValue;
     }
 }
 
