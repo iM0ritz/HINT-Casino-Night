@@ -12,6 +12,31 @@ let isAutoSpinning = false;
 let autoSpinTimeout = null;
 let currentSymbols = ["A", "A", "A"];
 
+// --- AUDIO ASSETS ---
+const spinSound = new Audio('/static/assets/sounds/reel-sound3.ogg');
+spinSound.loop = true;
+spinSound.volume = 0.2;
+spinSound.playbackRate = 1.0;
+
+const teaseSound = new Audio('/static/assets/sounds/reel-high-pitch2.ogg');
+teaseSound.volume = 0.4;
+
+const clunkSound = new Audio('/static/assets/sounds/reel-stop1.wav'); 
+clunkSound.volume = 0.3;
+
+const basicWinSound = new Audio('/static/assets/sounds/win-basic.wav');
+basicWinSound.volume = 0.8;
+
+const mediumWinSound = new Audio('/static/assets/sounds/win-medium.wav');
+mediumWinSound.volume = 0.9;
+
+
+const BORDER_CLASSES = {
+    "A": "reel-gold",    // Jackpot
+    "B": "reel-silver",  // Medium
+    "C": "reel-bronze"   // Frequent
+};
+
 // Poll the server every 1 second to check for unlocked/cashout states
 setInterval(fetchState, 1000);
 fetchState();
@@ -121,11 +146,13 @@ function toggleAutoSpin() {
     }
 }
 
-const BORDER_CLASSES = {
-    "A": "reel-gold",    // Jackpot
-    "B": "reel-silver",  // Medium
-    "C": "reel-bronze"   // Frequent
-};
+// Helper function to play overlapping sounds
+function playClunk() {
+    // Cloning allows Reel 2's clunk to play even if Reel 1's clunk hasn't finished echoing
+    const clone = clunkSound.cloneNode(); 
+    clone.volume = clunkSound.volume;
+    clone.play().catch(e => console.warn("Clunk blocked:", e));
+}
 
 // Helper function to handle the physical sliding of the reel strip
 function animateStrip(stripId, targetSymbol, duration, extraSpins) {
@@ -191,6 +218,10 @@ function animateStrip(stripId, targetSymbol, duration, extraSpins) {
 async function spinReels() {
     isSpinning = true;
     document.getElementById("spin-button").disabled = true;
+
+    // Spinning sound
+    spinSound.currentTime = 0;
+    spinSound.play().catch(e => console.warn("Audio blocked by browser:", e));
     
     const winMsg = document.getElementById("win-message");
     winMsg.classList.remove("show"); 
@@ -208,6 +239,7 @@ async function spinReels() {
 
         if (result.error) {
             alert(result.error);
+            spinSound.pause();
             isSpinning = false;
             return;
         }
@@ -221,6 +253,8 @@ async function spinReels() {
         let extraSpins2 = 10;
         let extraSpins3 = 20;
 
+        let isJackpotTease = false;
+
         // Anticipation Tease Logic: Add both TIME and SYMBOLS to keep speed constant!
         if (result.symbols[0] === "B" && result.symbols[1] === "B") {
             stopTime3 += 1500; // Add 1.5 seconds of suspense
@@ -229,6 +263,7 @@ async function spinReels() {
         if (result.symbols[0] === "A" && result.symbols[1] === "A") {
             stopTime3 += 3000; // Add 3 full seconds of suspense for a Jackpot tease
             extraSpins3 += 50; // Add 50 more symbols
+            isJackpotTease = true;
         }
 
         if (result.symbols[0] !== result.symbols[1]) {
@@ -240,12 +275,30 @@ async function spinReels() {
         animateStrip('strip-2', result.symbols[1], stopTime2, extraSpins2);
         animateStrip('strip-3', result.symbols[2], stopTime3, extraSpins3);
 
-        // Turn on the glowing borders the exact moment each reel lands
-        setTimeout(() => document.getElementById("reel-1").classList.add(BORDER_CLASSES[result.symbols[0]]), stopTime1);
-        setTimeout(() => document.getElementById("reel-2").classList.add(BORDER_CLASSES[result.symbols[1]]), stopTime2);
+        // Reel 1 Stops
+        setTimeout(() => {
+            playClunk();
+            document.getElementById("reel-1").classList.add(BORDER_CLASSES[result.symbols[0]]);
+        }, stopTime1);
+
+        // Reel 2 Stops
+        setTimeout(() => {
+            playClunk();
+            document.getElementById("reel-2").classList.add(BORDER_CLASSES[result.symbols[1]]);
+            if (isJackpotTease) {
+                spinSound.volume = 0; // "Duck" the normal spin volume down to 10%
+                teaseSound.currentTime = 0;
+                teaseSound.play().catch(e => console.warn("Audio blocked:", e));
+            }
+        }, stopTime2);
 
         // Final reel stops
         setTimeout(() => {
+            playClunk();
+            spinSound.pause();
+            teaseSound.pause();
+            spinSound.volume = 0.2;
+
             document.getElementById("reel-3").classList.add(BORDER_CLASSES[result.symbols[2]]);
 
             // Save what just landed so the next spin starts correctly
@@ -257,6 +310,15 @@ async function spinReels() {
                 else if (result.symbols[0] === "B") winText = `BIG WIN!<br>+${result.win_amount} COINS`;
                 else winText = `WIN!<br>+${result.win_amount} COINS`;
                 document.getElementById("win-message").innerHTML = winText;
+
+                if (result.symbols[0] === "B") {
+                    mediumWinSound.currentTime = 0; 
+                    mediumWinSound.play().catch(e => console.warn("Audio blocked:", e));
+                } else if (result.symbols[0] === "C") {
+                    basicWinSound.currentTime = 0; 
+                    basicWinSound.play().catch(e => console.warn("Audio blocked:", e));
+                }
+                
                 void winMsg.offsetWidth; 
                 winMsg.classList.add("show");
             }
@@ -298,6 +360,7 @@ async function spinReels() {
 
     } catch (error) {
         console.error("Error during spin:", error);
+        spinSound.pause();
         isSpinning = false;
     }
 }
