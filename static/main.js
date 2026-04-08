@@ -15,14 +15,15 @@ let currentSymbols = ["A", "A", "A"];
 // --- AUDIO ASSETS ---
 const spinSound = new Audio('/static/assets/sounds/reel-sound3.ogg');
 spinSound.loop = true;
-spinSound.volume = 0.2;
+spinSound.volume = 0.5;
 spinSound.playbackRate = 1.0;
 
 const teaseSound = new Audio('/static/assets/sounds/reel-high-pitch2.ogg');
-teaseSound.volume = 0.4;
+teaseSound.volume = 0.6;
+teaseSound.loop = true;
 
 const clunkSound = new Audio('/static/assets/sounds/reel-stop1.wav'); 
-clunkSound.volume = 0.3;
+clunkSound.volume = 0.5;
 
 const basicWinSound = new Audio('/static/assets/sounds/win-basic.wav');
 basicWinSound.volume = 0.8;
@@ -286,7 +287,7 @@ async function spinReels() {
             playClunk();
             document.getElementById("reel-2").classList.add(BORDER_CLASSES[result.symbols[1]]);
             if (isJackpotTease) {
-                spinSound.volume = 0; // "Duck" the normal spin volume down to 10%
+                spinSound.volume = 0;
                 teaseSound.currentTime = 0;
                 teaseSound.play().catch(e => console.warn("Audio blocked:", e));
             }
@@ -297,7 +298,7 @@ async function spinReels() {
             playClunk();
             spinSound.pause();
             teaseSound.pause();
-            spinSound.volume = 0.2;
+            spinSound.volume = 0.5;
 
             document.getElementById("reel-3").classList.add(BORDER_CLASSES[result.symbols[2]]);
 

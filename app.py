@@ -5,6 +5,9 @@ import logging
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 import random
 
+# TODO: sounds for admin cashout?
+# TODO: add sounds for jackpot
+
 # Tell Flask where to find the static/template folders when running as an .exe
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')
