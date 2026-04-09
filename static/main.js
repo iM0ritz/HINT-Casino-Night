@@ -14,8 +14,9 @@ let currentSymbols = ["A", "A", "A"];
 
 // --- AUDIO ASSETS ---
 const spinSound = new Audio('/static/assets/sounds/reel-sound3.ogg');
+const spinvolume = 0.3;
+spinSound.volume = spinvolume;
 spinSound.loop = true;
-spinSound.volume = 0.5;
 spinSound.playbackRate = 1.0;
 
 const teaseSound = new Audio('/static/assets/sounds/reel-high-pitch2.ogg');
@@ -30,6 +31,21 @@ basicWinSound.volume = 0.8;
 
 const mediumWinSound = new Audio('/static/assets/sounds/win-medium.wav');
 mediumWinSound.volume = 0.9;
+
+const jackpotCoinsSound = new Audio('/static/assets/sounds/coins.ogg'); 
+jackpotCoinsSound.loop = true;
+jackpotCoinsSound.volume = 1.0;
+
+const jackpotCountSound = new Audio('/static/assets/sounds/jackpot-count.wav'); 
+jackpotCountSound.loop = true;
+jackpotCountSound.volume = 1.0;
+
+const jackpotClimaxSound = new Audio('/static/assets/sounds/win-jackpot2.mp3'); 
+jackpotClimaxSound.volume = 1.0; 
+
+const bgMusic = new Audio('/static/assets/sounds/background-music.ogg'); 
+bgMusic.loop = true;
+bgMusic.volume = 0.5;
 
 
 const BORDER_CLASSES = {
@@ -298,7 +314,7 @@ async function spinReels() {
             playClunk();
             spinSound.pause();
             teaseSound.pause();
-            spinSound.volume = 0.5;
+            spinSound.volume = spinvolume;
 
             document.getElementById("reel-3").classList.add(BORDER_CLASSES[result.symbols[2]]);
 
@@ -387,7 +403,12 @@ function playJackpotRollup(winAmount, onCompleteCallback) {
     if (layout) layout.classList.add("rumble"); 
     
     let startTime = null;
-    const duration = 5000;
+    const duration = 7000;
+
+    jackpotCoinsSound.currentTime = 0;
+    jackpotCountSound.currentTime = 0;
+    jackpotCoinsSound.play().catch(e => console.warn("Audio blocked:", e));
+    jackpotCountSound.play().catch(e => console.warn("Audio blocked:", e));
     
     // Start Coin Fountain
     let coinInterval = setInterval(() => {
@@ -413,6 +434,11 @@ function playJackpotRollup(winAmount, onCompleteCallback) {
             requestAnimationFrame(updateCounter); 
         } else {
             // THE CLIMAX
+            jackpotCoinsSound.pause();
+            jackpotCountSound.pause();
+            jackpotClimaxSound.currentTime = 0;
+            jackpotClimaxSound.play().catch(e => console.warn("Audio blocked:", e));
+
             clearInterval(coinInterval); 
             if (layout) layout.classList.remove("rumble"); 
             counter.innerText = winAmount; 
@@ -447,3 +473,17 @@ function playJackpotRollup(winAmount, onCompleteCallback) {
     
     requestAnimationFrame(updateCounter);
 }
+
+function startBackgroundMusic() {
+    // Attempt to play the music
+    bgMusic.play().catch(e => console.warn("Background music blocked:", e));
+    
+    // Once it triggers successfully, immediately remove these listeners
+    // so we don't accidentally restart the song on every single click!
+    document.removeEventListener('click', startBackgroundMusic);
+    document.removeEventListener('keydown', startBackgroundMusic);
+}
+
+// Listen for the player's very first interaction with the window
+document.addEventListener('click', startBackgroundMusic);
+document.addEventListener('keydown', startBackgroundMusic);

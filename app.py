@@ -6,7 +6,8 @@ from flask import Flask, render_template, jsonify, request, session, redirect, u
 import random
 
 # TODO: sounds for admin cashout?
-# TODO: add sounds for jackpot
+# TODO: clean up assets
+# TODO: write README
 
 # Tell Flask where to find the static/template folders when running as an .exe
 if getattr(sys, 'frozen', False):
@@ -41,11 +42,11 @@ PAYOUTS = {
 # Unbalanced Reel Math (Weights are percentages)
 # Reels 1 & 2 (The Tease Reels)
 REELS_1_2_SYMBOLS = ["A", "B", "C"]
-REELS_1_2_WEIGHTS = [20, 25, 55]
+REELS_1_2_WEIGHTS = [55, 25, 20]
 
 # Reel 3 (The Heartbreaker Reel)
 REEL_3_SYMBOLS = ["A", "B", "C"]
-REEL_3_WEIGHTS = [10, 30, 60]
+REEL_3_WEIGHTS = [60, 30, 10]
 
 
 # --- 3. PAGE ROUTES (HTML) ---
