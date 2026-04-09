@@ -42,11 +42,11 @@ PAYOUTS = {
 # Unbalanced Reel Math (Weights are percentages)
 # Reels 1 & 2 (The Tease Reels)
 REELS_1_2_SYMBOLS = ["A", "B", "C"]
-REELS_1_2_WEIGHTS = [55, 25, 20]
+REELS_1_2_WEIGHTS = [20, 25, 55]
 
 # Reel 3 (The Heartbreaker Reel)
 REEL_3_SYMBOLS = ["A", "B", "C"]
-REEL_3_WEIGHTS = [60, 30, 10]
+REEL_3_WEIGHTS = [10, 30, 60]
 
 
 # --- 3. PAGE ROUTES (HTML) ---
