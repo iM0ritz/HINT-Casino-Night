@@ -95,7 +95,7 @@ function updateUI(state) {
         overlay.style.display = "flex";
         overlayText.innerText = "MACHINE LOCKED";
         overlayText.style.color = "var(--accent-red)";
-        overlaySubtext.innerText = "Please see the Admin to Buy-In.";
+        overlaySubtext.innerText = "Please see the Slot Cashier to Buy-In.";
         spinBtn.disabled = true;
         autoBtn.disabled = true;
         if (isAutoSpinning) toggleAutoSpin();
@@ -103,7 +103,7 @@ function updateUI(state) {
         overlay.style.display = "flex";
         overlayText.innerText = "OUT OF SPINS!";
         overlayText.style.color = "var(--accent-orange)";
-        overlaySubtext.innerText = "Please see the Admin to collect your winnings!";
+        overlaySubtext.innerText = "Please see the Slot Cashier to collect your winnings!";
         spinBtn.disabled = true;
         autoBtn.disabled = true;
         if (isAutoSpinning) toggleAutoSpin();
